@@ -30,8 +30,9 @@ use crate::{
     },
     token::ResetToken,
     transport_parameters::TransportParameters,
-    Dir, EndpointConfig, Frame, Side, StreamId, Transmit, TransportError, TransportErrorCode,
-    VarInt, MAX_STREAM_COUNT, MIN_INITIAL_SIZE, RESET_TOKEN_SIZE, TIMER_GRANULARITY,
+    Dir, EndpointConfig, Frame, Side, Source, StreamId, Transmit, TransportError,
+    TransportErrorCode, VarInt, MAX_STREAM_COUNT, MIN_INITIAL_SIZE, RESET_TOKEN_SIZE,
+    TIMER_GRANULARITY,
 };
 
 mod assembler;
@@ -461,7 +462,7 @@ impl Connection {
                     contents: buf,
                     ecn: None,
                     segment_size: None,
-                    src_ip: self.local_ip,
+                    src_ip: self.local_ip.map(Source::Ip),
                 });
             }
         }
@@ -797,7 +798,7 @@ impl Connection {
                 1 => None,
                 _ => Some(self.path.max_udp_payload_size as usize),
             },
-            src_ip: self.local_ip,
+            src_ip: self.local_ip.map(Source::Ip),
         })
     }
 

@@ -10,7 +10,7 @@ use std::{
     time::Instant,
 };
 
-use proto::{EcnCodepoint, Transmit};
+use proto::{EcnCodepoint, Source, Transmit};
 use tokio::io::unix::AsyncFd;
 
 use super::{cmsg, log_sendmsg_error, RecvMeta, UdpState, IO_ERROR_LOG_INTERVAL};
@@ -466,7 +466,7 @@ fn prepare_msg(
     if let Some(ip) = &transmit.src_ip {
         if cfg!(target_os = "linux") {
             match ip {
-                IpAddr::V4(v4) => {
+                Source::Ip(IpAddr::V4(v4)) => {
                     let pktinfo = libc::in_pktinfo {
                         ipi_ifindex: 0,
                         ipi_spec_dst: libc::in_addr {
@@ -476,7 +476,7 @@ fn prepare_msg(
                     };
                     encoder.push(libc::IPPROTO_IP, libc::IP_PKTINFO, pktinfo);
                 }
-                IpAddr::V6(v6) => {
+                Source::Ip(IpAddr::V6(v6)) => {
                     let pktinfo = libc::in6_pktinfo {
                         ipi6_ifindex: 0,
                         ipi6_addr: libc::in6_addr {
@@ -484,6 +484,14 @@ fn prepare_msg(
                         },
                     };
                     encoder.push(libc::IPPROTO_IPV6, libc::IPV6_PKTINFO, pktinfo);
+                }
+                Source::Interface(i) => {
+                    let pktinfo = libc::in_pktinfo {
+                        ipi_ifindex: *i as i32,
+                        ipi_spec_dst: libc::in_addr { s_addr: 0 },
+                        ipi_addr: libc::in_addr { s_addr: 0 },
+                    };
+                    encoder.push(libc::IPPROTO_IP, libc::IP_PKTINFO, pktinfo);
                 }
             }
         }

@@ -280,7 +280,16 @@ pub struct Transmit {
     /// This is `None` if the transmit only contains a single datagram
     pub segment_size: Option<usize>,
     /// Optional source IP address for the datagram
-    pub src_ip: Option<IpAddr>,
+    pub src_ip: Option<Source>,
+}
+
+/// Select how to set the source IP - using either interface id or the IP itself
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord)]
+pub enum Source {
+    /// Set source IP explicitly by IP
+    Ip(IpAddr),
+    /// Set via interface index, ipv4 only
+    Interface(u32),
 }
 
 //

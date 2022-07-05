@@ -28,7 +28,7 @@ use crate::{
         EndpointEventInner, IssuedCid,
     },
     transport_parameters::TransportParameters,
-    ResetToken, RetryToken, Side, Transmit, TransportConfig, TransportError,
+    ResetToken, RetryToken, Side, Source, Transmit, TransportConfig, TransportError,
     INITIAL_MAX_UDP_PAYLOAD_SIZE, MAX_CID_SIZE, MIN_INITIAL_SIZE, RESET_TOKEN_SIZE,
 };
 
@@ -189,7 +189,7 @@ impl Endpoint {
                     ecn: None,
                     contents: buf,
                     segment_size: None,
-                    src_ip: local_ip,
+                    src_ip: local_ip.map(Source::Ip),
                 });
                 return None;
             }
@@ -356,7 +356,7 @@ impl Endpoint {
             ecn: None,
             contents: buf,
             segment_size: None,
-            src_ip: addresses.local_ip,
+            src_ip: addresses.local_ip.map(Source::Ip),
         });
     }
 
@@ -545,7 +545,7 @@ impl Endpoint {
                     ecn: None,
                     contents: buf,
                     segment_size: None,
-                    src_ip: addresses.local_ip,
+                    src_ip: addresses.local_ip.map(Source::Ip),
                 });
                 return None;
             }
@@ -708,7 +708,7 @@ impl Endpoint {
             ecn: None,
             contents: buf,
             segment_size: None,
-            src_ip: addresses.local_ip,
+            src_ip: addresses.local_ip.map(Source::Ip),
         })
     }
 
